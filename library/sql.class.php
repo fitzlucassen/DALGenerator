@@ -1,5 +1,5 @@
 <?php
-    namespace DALGenerator;
+    namespace fitzlucassen\DALGenerator;
     USE PDO;
 
     /*

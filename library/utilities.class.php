@@ -1,16 +1,19 @@
 <?php
-    namespace DALGenerator;
+    namespace fitzlucassen\DALGenerator;
 	
     class Utilities {
 	private $_connection;
 	private $_master_array;
+	private $_two_files;
 	
 	/**
 	 * Constructor
-	 * @param type $connexion
+	 * @param PDOConnection $connexion
+	 * @param int $two_files 1 if you want only one class to do both roles, 2 if you want two separate files (entity and repository)
 	 */
-	public function __construct($connexion) {
+	public function __construct($connexion, $two_files) {
 	    $this->_connection = $connexion;
+	    $this->_two_files = $two_files;
 	}
 	
 	
@@ -73,7 +76,9 @@
 	 */
 	private function CreateClass($tableName, $tableFields, $pathE, $pathR){
 	    // On créée les fichiers entity et repository
-	    $entityFile = fopen($pathE . $tableName . ".php", "a+");
+	    if($this->_two_files === 2)
+		$entityFile = fopen($pathE . $tableName . ".php", "a+");
+	    
 	    $repositoryFile = fopen($pathR . $tableName . "Repository.php", "a+");
 
 	    // On commence le code source
@@ -82,10 +87,16 @@
 	    $sourceRepository .= "\tclass " . ucwords($tableName) . "Repository {\n";
 
 	    // Et on remplit la classe
-	    $sourceEntity .= $this->FillEntityAttributs($tableName, $tableFields);
+	    if($this->_two_files === 2)
+		$sourceEntity .= $this->FillEntityAttributs($tableName, $tableFields);
+	    else
+		$sourceRepository .= $this->FillEntityAttributs($tableName, $tableFields);
 	    $sourceRepository .= $this->FillRepositoryAttributs($tableName, $tableFields);
 
-	    $sourceEntity .= $this->FillEntityMethods($tableName, $tableFields);
+	    if($this->_two_files === 2)
+		$sourceEntity .= $this->FillEntityMethods($tableName, $tableFields);
+	    else
+		$sourceRepository .= $this->FillEntityMethods($tableName, $tableFields);
 	    $sourceRepository .= $this->FillRepositoryMethods($tableName, $tableFields);
 
 	    // On finit le code source
@@ -95,11 +106,14 @@
 	    $sourceRepository .= "?>";
 
 	    // On ecrit le contenu de chaque classe dans leur fichier
-	    fwrite($entityFile, $sourceEntity);
+	    if($this->_two_files === 2)
+		fwrite($entityFile, $sourceEntity);
+	    
 	    fwrite($repositoryFile, $sourceRepository);
 
 	    // On ferme les deux fichiers
-	    fclose($entityFile);
+	    if($this->_two_files === 2)
+		fclose($entityFile);
 	    fclose($repositoryFile);
 	}
 
@@ -151,6 +165,9 @@
 		    $source .= ', ';
 		$cpt++;
 	    }
+	    if($this->_two_files !== 2){
+		$source .= ', $pdo, $lang';
+	    }
 	    $source .= "){\n";
 	    $source .= "\t\t\tFillObject(array(";
 
@@ -165,12 +182,14 @@
 	    $source .= "\t\t}\n\n";
 
 	    // Getters publiques
+	    $source .= "\t\t/***********" . "\n\t\t" . ' * GETTERS *' . "\n\t\t" . ' ***********/' . "\n";
 	    foreach($tableFields as $thisField){
 		$source .= "\t\tpublic function Get" .ucwords($thisField['label']) . "() {\n";
 		$source .= "\t\t\treturn " . '$this->_' . $thisField['label'] . ";\n";
-		$source .= "\t\t}\n\n";
+		$source .= "\t\t}\n";
 	    }
-
+	    $source .= "\t\t/*******" . "\n\t\t" . ' * END *' . "\n\t\t" . ' *******/' . "\n\n";
+	    
 	    // Fonction privé pour remplir un objet
 	    $source .= "\t\tpublic function FillObject(" . '$properties' . ") {\n";
 	    foreach($tableFields as $thisField){
@@ -191,12 +210,15 @@
 	    $source = "";
 
 	    // Constructeur
-	    $source .= "\t\tpublic function __construct(" . '$pdo, $lang' . "){";
-	    $source .= "\n\t\t\t" . '$this->_pdo = $pdo;';
-	    $source .= "\n\t\t\t" . '$this->_lang = $lang;';
-	    $source .= "\n\t\t}\n\n";
-
+	    if($this->_two_files === 2){
+		$source .= "\t\tpublic function __construct(" . '$pdo, $lang' . "){";
+		$source .= "\n\t\t\t" . '$this->_pdo = $pdo;';
+		$source .= "\n\t\t\t" . '$this->_lang = $lang;';
+		$source .= "\n\t\t}\n\n";
+	    }
 	    // GetAll
+	    $source .= "\t\t/**************************" . "\n\t\t" . ' * REPOSITORIES FUNCTIONS *' . "\n\t\t" . ' **************************/' . "\n";
+	    
 	    $source .= "\t\tpublic function GetAll(){\n";
 	    $source .= "\t\t\t" . '$query = "SELECT * FROM ' . $tableName . '";' . "\n";
 	    $source .= "\t\t\ttry {\n";
@@ -284,8 +306,9 @@
 	    $source .= "\t\t\t}\n\t\t\tcatch(PDOException " . '$e){' . "\n";
 	    $source .= "\t\t\t\tprint " . '$e->getMessage();' . "\n\t\t\t}\n";
 	    $source .= "\t\t\treturn array();\n";
-	    $source .= "\t\t}\n\n";
+	    $source .= "\t\t}\n";
 
+	    $source .= "\t\t/*******" . "\n\t\t" . ' * END *' . "\n\t\t" . ' *******/' . "\n\n";
 	    return $source;
 	}
     }
