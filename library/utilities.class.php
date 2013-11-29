@@ -36,18 +36,22 @@
 	 *************/
 	/**
 	 * GetTablesArray
+	 * @param array the name of the tables you don't want to implement
 	 * @return array $master_array
 	 */
-	public function GetTablesArray(){
-	    // On rÃ©cupÃ¨re toutes les tables de la base voulue
+	public function GetTablesArray($ignore_tables = array()){
+	    // On récupère toutes les tables de la base voulue
 	    $all_tables = $this->_connection->SelectTable("SHOW TABLES FROM " . $this->_connection->GetDB());
 	    $master_array = array();
 
 	    // Et pour chacune d'entre elles
 	    foreach($all_tables as $thisTable){
+		if(in_array($thisTable['Tables_in_passangerv2'], $ignore_tables))
+		    continue;
+		
 		$master_array[$thisTable['Tables_in_passangerv2']] = array();
 
-		// On rÃ©cupÃ¨re tous les champs
+		// On récupère tous les champs
 		$fields = $this->_connection->SelectTable("SHOW FIELDS FROM " . $this->_connection->GetDB() . "." . $thisTable['Tables_in_passangerv2']);
 
 		// Et pour chacun d'entre eux on les ajoute Ã  la table cible
