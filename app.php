@@ -1,10 +1,11 @@
 <?php
-
     require_once 'library/config.class.php';
     require_once 'library/sql.class.php';
+    require_once 'library/fileManager.class.php';
     require_once 'library/utilities.class.php';
 
     $Config = fitzlucassen\DALGenerator\Config::GetInstance();
+    $fm = fitzlucassen\DALGenerator\FileManager::GetInstance();
     
     /*************************
      * PUT YOUR CONFIGS HERE *
@@ -20,7 +21,7 @@
      *******/
     
     $Connexion = new fitzlucassen\DALGenerator\Sql($Config->GetDB(), $Config->GetHOST(), $Config->GetUSER(), $Config->GetPWD());
-    $Utilities = new fitzlucassen\DALGenerator\Utilities($Connexion, 1);
+    $Utilities = new fitzlucassen\DALGenerator\Utilities($Connexion, 2);
     $master_array = $Utilities->GetTablesArray();
 
     $Utilities->CreateClasses($Config->GetPATHENTITIES(), $Config->GetPATHREPOSITORIES());

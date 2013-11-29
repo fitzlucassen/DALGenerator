@@ -86,9 +86,9 @@
 	    $repositoryFile = fopen($pathR . $tableName . "Repository.php", "a+");
 
 	    // On commence le code source
-	    $sourceEntity = $sourceRepository = "<?php \n" . $this->GetHeaderComment();
-	    $sourceEntity .= "\tclass " . ucwords($tableName) . " {\n";
-	    $sourceRepository .= "\tclass " . ucwords($tableName) . "Repository {\n";
+	    $sourceEntity = $sourceRepository = "<?php " . FileManager::getBackSpace() . $this->GetHeaderComment();
+	    $sourceEntity .= FileManager::getTab() . "class " . ucwords($tableName) . " {" . FileManager::getBackSpace();
+	    $sourceRepository .= FileManager::getTab() . "class " . ucwords($tableName) . "Repository {" . FileManager::getBackSpace();
 
 	    // Et on remplit la classe
 	    if($this->_two_files === 2)
@@ -104,10 +104,8 @@
 	    $sourceRepository .= $this->FillRepositoryMethods($tableName, $tableFields);
 
 	    // On finit le code source
-	    $sourceEntity .= "\t}\n";
-	    $sourceRepository .= "\t}\n";
-	    $sourceEntity .= "?>";
-	    $sourceRepository .= "?>";
+	    $sourceEntity .= FileManager::getTab() . "}" . FileManager::getBackSpace() . "?>";
+	    $sourceRepository .= FileManager::getTab() . "}" . FileManager::getBackSpace() . "?>";
 
 	    // On ecrit le contenu de chaque classe dans leur fichier
 	    if($this->_two_files === 2)
@@ -131,9 +129,9 @@
 	    $source = "";
 
 	    foreach($tableFields as $thisField){
-		$source .= "\t\tprivate " . '$_' . $thisField['label'] . ";\n";
+		$source .= FileManager::getTab(2) . 'private $_' . $thisField['label'] . ';' . FileManager::getBackSpace();
 	    }
-	    $source .= "\n";
+	    $source .= FileManager::getBackSpace();
 
 	    return $source;
 	}
@@ -145,8 +143,8 @@
 	 * @return string source code to write
 	 */
 	private function FillRepositoryAttributs($tableName, $tableFields){
-	    $source = "\t\tprivate " . '$_pdo;' . "\n";
-	    $source .= "\t\tprivate " . '$_lang;' . "\n\n";
+	    $source = FileManager::getTab(2) . 'private $_pdo;' . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(2) . 'private $_lang;' . FileManager::getBackSpace(2);
 
 	    return $source;
 	}
@@ -161,7 +159,7 @@
 	    $source = "";
 
 	    // Constructeur
-	    $source .= "\t\tpublic function __construct(";
+	    $source .= FileManager::getTab(2) . "public function __construct(";
 	    $cpt = 0;
 	    foreach($tableFields as $thisField){
 		$source .= '$' . $thisField['label'];
@@ -172,8 +170,8 @@
 	    if($this->_two_files !== 2){
 		$source .= ', $pdo, $lang';
 	    }
-	    $source .= "){\n";
-	    $source .= "\t\t\tFillObject(array(";
+	    $source .= "){" . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(3) . '$this->fillObject(array(';
 
 	    $cpt = 0;
 	    foreach($tableFields as $thisField){
@@ -182,24 +180,28 @@
 		    $source .= ', ';
 		$cpt++;
 	    }
-	    $source .= "));\n";
-	    $source .= "\t\t}\n\n";
+	    $source .= "));" . FileManager::getBackSpace() . FileManager::getTab(2) . "}" . FileManager::getBackSpace(2);
 
 	    // Getters publiques
-	    $source .= "\t\t/***********" . "\n\t\t" . ' * GETTERS *' . "\n\t\t" . ' ***********/' . "\n";
-	    foreach($tableFields as $thisField){
-		$source .= "\t\tpublic function Get" .ucwords($thisField['label']) . "() {\n";
-		$source .= "\t\t\treturn " . '$this->_' . $thisField['label'] . ";\n";
-		$source .= "\t\t}\n";
-	    }
-	    $source .= "\t\t/*******" . "\n\t\t" . ' * END *' . "\n\t\t" . ' *******/' . "\n\n";
+	    $source .=	FileManager::getTab(2) . FileManager::getComment(11, true) . FileManager::getBackSpace() . 
+			FileManager::getTab(2) . ' * GETTERS *' . FileManager::getBackSpace() . 
+			FileManager::getTab(2) . FileManager::getComment(11, false) . FileManager::getBackSpace();
 	    
-	    // Fonction privÃ© pour remplir un objet
-	    $source .= "\t\tpublic function FillObject(" . '$properties' . ") {\n";
 	    foreach($tableFields as $thisField){
-		$source .= "\t\t\t" . '$this->_' . $thisField['label'] . ' = $properties["' . $thisField['label'] . '"];' . "\n";
+		$source .=  FileManager::getTab(2) . FileManager::getPrototype("get" . ucwords($thisField['label'])) . "() {" . FileManager::getBackSpace() .
+			    FileManager::getTab(3) . 'return $this->_' . $thisField['label'] . ';' . FileManager::getBackSpace() .
+			    FileManager::getTab(2) . '}' . FileManager::getBackSpace();
 	    }
-	    $source .= "\t\t}\n";
+	    $source .=	FileManager::getTab(2) . FileManager::getComment(7, true) . FileManager::getBackSpace() . 
+			FileManager::getTab(2) . ' * END *' . FileManager::getBackSpace() . 
+			FileManager::getTab(2) . FileManager::getComment(7, false) . FileManager::getBackSpace(2);
+	    
+	    // Fonction privé pour remplir un objet
+	    $source .= FileManager::getTab(2) . FileManager::getPrototype("fillObject") . '($properties) {' . FileManager::getBackSpace();
+	    foreach($tableFields as $thisField){
+		$source .= FileManager::getTab(3) . '$this->_' . $thisField['label'] . ' = $properties["' . $thisField['label'] . '"];' . FileManager::getBackSpace();
+	    }
+	    $source .= FileManager::getTab(2) . "}" . FileManager::getBackSpace();
 
 	    return $source;
 	}
@@ -215,49 +217,51 @@
 
 	    // Constructeur
 	    if($this->_two_files === 2){
-		$source .= "\t\tpublic function __construct(" . '$pdo, $lang' . "){";
-		$source .= "\n\t\t\t" . '$this->_pdo = $pdo;';
-		$source .= "\n\t\t\t" . '$this->_lang = $lang;';
-		$source .= "\n\t\t}\n\n";
+		$source .= FileManager::getTab(2) . FileManager::getPrototype("__construct") . '($pdo, $lang){' . FileManager::getBackSpace();
+		$source .= FileManager::getTab(3) . '$this->_pdo = $pdo;' . FileManager::getBackSpace();
+		$source .= FileManager::getTab(3) . '$this->_lang = $lang;' . FileManager::getBackSpace();
+		$source .= FileManager::getTab(2) . '}' . FileManager::getBackSpace(2);
 	    }
 	    // GetAll
-	    $source .= "\t\t/**************************" . "\n\t\t" . ' * REPOSITORIES FUNCTIONS *' . "\n\t\t" . ' **************************/' . "\n";
+	    $source .=	FileManager::getTab(2) . FileManager::getComment(26, true) . FileManager::getBackSpace() . 
+			FileManager::getTab(2) . ' * REPOSITORIES FUNCTIONS *' . FileManager::getBackSpace() . 
+			FileManager::getTab(2) . FileManager::getComment(26, false) . FileManager::getBackSpace();
 	    
-	    $source .= "\t\tpublic function GetAll(){\n";
-	    $source .= "\t\t\t" . '$query = "SELECT * FROM ' . $tableName . '";' . "\n";
-	    $source .= "\t\t\ttry {\n";
-	    $source .= "\t\t\t\treturn " . '$this->_pdo->SelectTable($query);' . "\n";
-	    $source .= "\t\t\t}\n\t\t\tcatch(PDOException " . '$e){' . "\n";
-	    $source .= "\t\t\t\tprint " . '$e->getMessage();' . "\n\t\t\t}\n";
-	    $source .= "\t\t\treturn array();\n";
-	    $source .= "\t\t}\n\n";
+	    $source .= FileManager::getTab(2) . FileManager::getPrototype("getAll") . "(){" . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(3) . '$query = "SELECT * FROM ' . $tableName . '";' . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(3) . 'try {' . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(4) . 'return $this->_pdo->SelectTable($query);' . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(3) . '}' . FileManager::getBackSpace() . FileManager::getTab(3) .  "catch(PDOException " . '$e){' . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(4) . 'print $e->getMessage();' . FileManager::getBackSpace() . FileManager::getTab(3) ."}" . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(3) . 'return array();' . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(2) . '}' . FileManager::getBackSpace(2);
 
 	    // GetById
-	    $source .= "\t\tpublic function GetById(" . '$id' . "){\n";
-	    $source .= "\t\t\t" . '$query = "SELECT * FROM ' . $tableName . ' WHERE id=" . $id;' . "\n";
-	    $source .= "\t\t\ttry {\n";
-	    $source .= "\t\t\t\t" . '$properties = $this->_pdo->Select($query);' . "\n";
-	    $source .= "\t\t\t\t" . '$object = new ' . ucwords($tableName) . '();' . "\n";
-	    $source .= "\t\t\t\t" . '$object->FillObject($properties);' . "\n";
-	    $source .= "\t\t\t\t" . 'return $object;' . "\n";
-	    $source .= "\t\t\t}\n\t\t\tcatch(PDOException " . '$e){' . "\n";
-	    $source .= "\t\t\t\tprint " . '$e->getMessage();' . "\n\t\t\t}\n";
-	    $source .= "\t\t\treturn array();\n";
-	    $source .= "\t\t}\n\n";
+	    $source .= FileManager::getTab(2) . FileManager::getPrototype("getById") . '($id){' . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(3) . '$query = "SELECT * FROM ' . $tableName . ' WHERE id=" . $id;' . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(3) . 'try {' . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(4) . '$properties = $this->_pdo->Select($query);' . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(4) . '$object = new ' . ucwords($tableName) . '();' . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(4) . '$object->fillObject($properties);' . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(4) . 'return $object;' . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(3) . '}' . FileManager::getBackSpace() . FileManager::getTab(3) . 'catch(PDOException $e){' . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(4) . 'print $e->getMessage();' . FileManager::getBackSpace() . FileManager::getTab(3) . "}" . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(3) . 'return array();' . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(2) . '}' . FileManager::getBackSpace(2);
 
 	    // Delete
-	    $source .= "\t\tpublic function Delete(" . '$id' . ") {\n";
-	    $source .= "\t\t\t" . '$query = "DELETE FROM ' . $tableName . ' WHERE id=" . $id;' . "\n";
-	    $source .= "\t\t\ttry {\n";
-	    $source .= "\t\t\t\treturn " . '$this->_pdo->Query($query);' . "\n";
-	    $source .= "\t\t\t}\n\t\t\tcatch(PDOException " . '$e){' . "\n";
-	    $source .= "\t\t\t\tprint " . '$e->getMessage();' . "\n\t\t\t}\n";
-	    $source .= "\t\t\treturn array();\n";
-	    $source .= "\t\t}\n\n";
+	    $source .= FileManager::getTab(2) . FileManager::getPrototype("delete") . '($id) {' . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(3) . '$query = "DELETE FROM ' . $tableName . ' WHERE id=" . $id;' . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(3) . 'try {' . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(4) . 'return $this->_pdo->Query($query);' . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(3) . '}' . FileManager::getBackSpace() . FileManager::getTab(3) . 'catch(PDOException $e){' . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(4) . 'print $e->getMessage();' . FileManager::getBackSpace() . FileManager::getTab(3) . '}' . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(3) . 'return array();' . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(2) . '}' . FileManager::getBackSpace(2);
 
 	    // Add
-	    $source .= "\t\tpublic function Add(" . '$properties' . ") {\n";
-	    $source .= "\t\t\t" . '$query = "INSERT INTO ' . $tableName . '(';
+	    $source .= FileManager::getTab(2) . FileManager::getPrototype("add") . '($properties) {' . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(3) . '$query = "INSERT INTO ' . $tableName . '(';
 	    $cpt = 0;
 	    foreach($tableFields as $thisField){
 		$source .= "'" . $thisField['label'] . "'";
@@ -265,8 +269,7 @@
 		    $source .= ', ';
 		$cpt++;
 	    }
-	    $source .= ")\n";
-	    $source .= "\t\t\t\tVALUES(";
+	    $source .= ')' . FileManager::getBackSpace() . FileManager::getTab(4) . 'VALUES(';
 
 	    $cpt = 0;
 	    foreach($tableFields as $thisField){
@@ -279,18 +282,18 @@
 		    $source .= ', ';
 		$cpt++;
 	    }
-	    $source .= ")" . '";' . "\n";
-	    $source .= "\t\t\ttry {\n";
-	    $source .= "\t\t\t\treturn " . '$this->_pdo->Query($query);' . "\n";
-	    $source .= "\t\t\t}\n\t\t\tcatch(PDOException " . '$e){' . "\n";
-	    $source .= "\t\t\t\tprint " . '$e->getMessage();' . "\n\t\t\t}\n";
-	    $source .= "\t\t\treturn array();\n";
-	    $source .= "\t\t}\n\n";
+	    $source .= ')";' . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(3) . 'try {' . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(4) . 'return $this->_pdo->Query($query);' . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(3) . '}' . FileManager::getBackSpace() . FileManager::getTab(3) . 'catch(PDOException $e){' . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(4) . 'print $e->getMessage();' . FileManager::getBackSpace() . FileManager::getTab(3) . '}' . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(3) . 'return array();' . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(2) . '}' . FileManager::getBackSpace(2);
 
 	    // Update
-	    $source .= "\t\tpublic function Update(" . '$id, $properties' . ") {\n";
-	    $source .= "\t\t\t" . '$query = "UPDATE ' . $tableName . " \n";
-	    $source .= "\t\t\t\tSET ";
+	    $source .= FileManager::getTab(2) . FileManager::getPrototype("update") . '($id, $properties) {' . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(3) . '$query = "UPDATE ' . $tableName . " " . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(4) . 'SET ';
 
 	    $cpt = 0;
 	    foreach($tableFields as $thisField){
@@ -304,26 +307,28 @@
 		    $source .= ', ';
 		$cpt++;
 	    }
-	    $source .= "\n\t\t\t\tWHERE id=" . '" . $id;' . "\n";
-	    $source .= "\t\t\ttry {\n";
-	    $source .= "\t\t\t\treturn " . '$this->_pdo->Query($query);' . "\n";
-	    $source .= "\t\t\t}\n\t\t\tcatch(PDOException " . '$e){' . "\n";
-	    $source .= "\t\t\t\tprint " . '$e->getMessage();' . "\n\t\t\t}\n";
-	    $source .= "\t\t\treturn array();\n";
-	    $source .= "\t\t}\n";
+	    $source .= FileManager::getBackSpace() . FileManager::getTab(4) . 'WHERE id=" . $id;' . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(3) . 'try {' . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(4) . 'return $this->_pdo->Query($query);' . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(3) . '}' . FileManager::getBackSpace() . FileManager::getTab(3) . 'catch(PDOException $e){' . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(4) . 'print $e->getMessage();' . FileManager::getBackSpace() . FileManager::getTab(3) . '}' . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(3) . 'return array();' . FileManager::getBackSpace();
+	    $source .= FileManager::getTab(2) . '}' . FileManager::getBackSpace();
 
-	    $source .= "\t\t/*******" . "\n\t\t" . ' * END *' . "\n\t\t" . ' *******/' . "\n\n";
+	    $source .=	FileManager::getTab(2) . FileManager::getComment(7, true) . FileManager::getBackSpace() . 
+			FileManager::getTab(2) . ' * END *' . FileManager::getBackSpace() . FileManager::getTab(2) . 
+			FileManager::getComment(7, false) . FileManager::getBackSpace(2);
 	    return $source;
 	}
 	
 	private function GetHeaderComment(){
 	    $source= "";
 	    
-	    $source .= "\t/**********************************************************\n";
-	    $source .= "\t **** File generated by fitzlucassen\DALGenerator tool ****\n";
-	    $source .= "\t * All right reserved to fitzlucassen repository on github*\n";
-	    $source .= "\t ************* https://github.com/fitzlucassen ************\n";
-	    $source .= "\t **********************************************************/\n";
+	    $source .= FileManager::getTab() . FileManager::getComment(58, true) . FileManager::getBackSpace();
+	    $source .= FileManager::getTab() . " **** File generated by fitzlucassen\DALGenerator tool ****" . FileManager::getBackSpace();
+	    $source .= FileManager::getTab() . " * All right reserved to fitzlucassen repository on github*" . FileManager::getBackSpace();
+	    $source .= FileManager::getTab() . " ************* https://github.com/fitzlucassen ************" . FileManager::getBackSpace();
+	    $source .= FileManager::getTab() . FileManager::getComment(58, false) . FileManager::getBackSpace();
 	    
 	    return $source;
 	}
