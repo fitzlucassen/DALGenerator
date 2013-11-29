@@ -1,11 +1,11 @@
 <?php
     class Config {
-	private $_DB;
-	private $_HOST;
-	private $_USER;
-	private $_PWD;
-	private $_PATH_ENTITIES;
-	private $_PATH_REPOSITORIES;
+	private static $_DB;
+	private static $_HOST;
+	private static $_USER;
+	private static $_PWD;
+	private static $_PATH_ENTITIES;
+	private static $_PATH_REPOSITORIES;
 	private static $_cpt_instance = 0;
 	
 	/**
@@ -19,8 +19,8 @@
 	 * @return \Config|boolean
 	 */
 	public function GetInstance(){
-	    if($this->_cpt_instance === 0){
-		$this->_cpt_instance++;
+	    if(Config::$_cpt_instance === 0){
+		Config::$_cpt_instance++;
 		return new Config();
 	    }
 	    else
@@ -35,7 +35,7 @@
 	 * @param type $db
 	 */
 	public function SetDB($db){
-	    $this->_DB = $DB;
+	    Config::$_DB = $db;
 	}
 	
 	/**
@@ -43,7 +43,7 @@
 	 * @param type $host
 	 */
 	public function SetHOST($host){
-	    $this->_HOST = $host;
+	    Config::$_HOST = $host;
 	}
 	
 	/**
@@ -51,7 +51,7 @@
 	 * @param type $user
 	 */
 	public function SetUSER($user){
-	    $this->_USER = $user;
+	    Config::$_USER = $user;
 	}
 	
 	/**
@@ -59,7 +59,7 @@
 	 * @param type $pwd
 	 */
 	public function SetPWD($pwd){
-	    $this->_PWD = $pwd;
+	    Config::$_PWD = $pwd;
 	}
 	
 	/**
@@ -67,7 +67,7 @@
 	 * @param type $path
 	 */
 	public function SetPATHENTITIES($path){
-	    $this->_PATH_ENTITIES = $path;
+	    Config::$_PATH_ENTITIES = $path;
 	}
 	
 	/**
@@ -75,6 +75,59 @@
 	 * @param type $path
 	 */
 	public function SetPATHREPOSITORIES($path){
-	    $this->_PATH_REPOSITORIES = $path;
+	    Config::$_PATH_REPOSITORIES = $path;
+	}
+	
+	
+	
+	/***********
+	 * GETTERS *
+	 ***********/
+	/**
+	 * GetDB
+	 * @return type $db
+	 */
+	public function GetDB(){
+	    return Config::$_DB;
+	}
+	
+	/**
+	 * GetHOST
+	 * @return type $host
+	 */
+	public function GetHOST(){
+	    return Config::$_HOST;
+	}
+	
+	/**
+	 * GetUSER
+	 * @return type $user
+	 */
+	public function GetUSER(){
+	    return Config::$_USER;
+	}
+	
+	/**
+	 * GetPWD
+	 * @return type $pwd
+	 */
+	public function GetPWD(){
+	    return Config::$_PWD;
+	}
+	
+	/**
+	 * GetPATHENTITIES
+	 * @return type $path
+	 */
+	public function GetPATHENTITIES(){
+	    return Config::$_PATH_ENTITIES;
+	}
+	
+	/**
+	 * GetPATHREPOSITORIES
+	 * @return type $path
+	 */
+	public function GetPATHREPOSITORIES(){
+	    return Config::$_PATH_REPOSITORIES;
 	}
     }

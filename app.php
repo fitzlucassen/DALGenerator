@@ -19,8 +19,8 @@
      * END *
      *******/
     
-    $Connexion = new Sql(DB, HOST, USER, PWD);
+    $Connexion = new Sql($Config->GetDB(), $Config->GetHOST(), $Config->GetUSER(), $Config->GetPWD());
     $Utilities = new Utilities($Connexion);
     $master_array = $Utilities->GetTablesArray();
 
-    $Utilities->CreateClasses();
+    $Utilities->CreateClasses($Config->GetPATHENTITIES(), $Config->GetPATHREPOSITORIES());

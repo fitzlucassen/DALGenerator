@@ -58,9 +58,9 @@
 	/**
 	 * CreateClasses -> Create all classes
 	 */
-	public function CreateClasses(){
+	public function CreateClasses($pathE, $pathR){
 	    foreach($this->_master_array as $key => $value){
-		$this->CreateClass($key, $value);
+		$this->CreateClass($key, $value, $pathE, $pathR);
 	    }
 	}
 
@@ -69,10 +69,10 @@
 	 * @param string $tableName
 	 * @param array $tableFields
 	 */
-	private function CreateClass($tableName, $tableFields){
+	private function CreateClass($tableName, $tableFields, $pathE, $pathR){
 	    // On créée les fichiers entity et repository
-	    $entityFile = fopen(PATH_ENTITIES . $tableName . ".php", "a+");
-	    $repositoryFile = fopen(PATH_REPOSITORIES . $tableName . "Repository.php", "a+");
+	    $entityFile = fopen($pathE . $tableName . ".php", "a+");
+	    $repositoryFile = fopen($pathR . $tableName . "Repository.php", "a+");
 
 	    // On commence le code source
 	    $sourceEntity = $sourceRepository = "<?php \n";
