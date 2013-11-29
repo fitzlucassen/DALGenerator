@@ -1,27 +1,27 @@
 <?php
-    require_once 'library/config.class.php';
-    require_once 'library/sql.class.php';
-    require_once 'library/fileManager.class.php';
-    require_once 'library/utilities.class.php';
+    require_once 'library/Config.php';
+    require_once 'library/Sql.php';
+    require_once 'library/FileManager.php';
+    require_once 'library/Utilities.php';
 
-    $Config = fitzlucassen\DALGenerator\Config::GetInstance();
-    $fm = fitzlucassen\DALGenerator\FileManager::GetInstance();
+    $Config = fitzlucassen\DALGenerator\Config::getInstance();
+    $fm = fitzlucassen\DALGenerator\FileManager::getInstance();
     
     /*************************
      * PUT YOUR CONFIGS HERE *
      *************************/
-    $Config->SetDB("passangerv2");					    // database
-    $Config->SetHOST("localhost");					    // database host
-    $Config->SetUSER("root");						    // user name
-    $Config->SetPWD("");						    // password
-    $Config->SetPATHENTITIES("C:/wamp/www/DALGenerator/Entity/");	    // The path where entities will be created
-    $Config->SetPATHREPOSITORIES("C:/wamp/www/DALGenerator/Repository/");   // The path where repositories will be created
+    $Config->setDB("passangerv2");					    // database
+    $Config->setHOST("localhost");					    // database host
+    $Config->setUSER("root");						    // user name
+    $Config->setPWD("");						    // password
+    $Config->setPATHENTITIES("C:/wamp/www/DALGenerator/Entity/");	    // The path where entities will be created
+    $Config->setPATHREPOSITORIES("C:/wamp/www/DALGenerator/Repository/");   // The path where repositories will be created
     /*******
      * END *
      *******/
     
-    $Connexion = new fitzlucassen\DALGenerator\Sql($Config->GetDB(), $Config->GetHOST(), $Config->GetUSER(), $Config->GetPWD());
+    $Connexion = new fitzlucassen\DALGenerator\Sql($Config->getDB(), $Config->getHOST(), $Config->getUSER(), $Config->getPWD());
     $Utilities = new fitzlucassen\DALGenerator\Utilities($Connexion, 2);
-    $master_array = $Utilities->GetTablesArray();
+    $master_array = $Utilities->getTablesArray();
 
-    $Utilities->CreateClasses($Config->GetPATHENTITIES(), $Config->GetPATHREPOSITORIES());
+    $Utilities->createClasses($Config->getPATHENTITIES(), $Config->getPATHREPOSITORIES());

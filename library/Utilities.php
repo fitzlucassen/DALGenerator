@@ -25,7 +25,7 @@
 	 * SetMasterArray
 	 * @param array $array
 	 */
-	public function SetMasterArray($array){
+	public function setMasterArray($array){
 	    $this->_master_array = $array;
 	}
 	
@@ -39,7 +39,7 @@
 	 * @param array the name of the tables you don't want to implement
 	 * @return array $master_array
 	 */
-	public function GetTablesArray($ignore_tables = array()){
+	public function getTablesArray($ignore_tables = array()){
 	    // On récupère toutes les tables de la base voulue
 	    $all_tables = $this->_connection->SelectTable("SHOW TABLES FROM " . $this->_connection->GetDB());
 	    $master_array = array();
@@ -67,7 +67,7 @@
 	/**
 	 * CreateClasses -> Create all classes
 	 */
-	public function CreateClasses($pathE, $pathR){
+	public function createClasses($pathE, $pathR){
 	    foreach($this->_master_array as $key => $value){
 		$this->CreateClass($key, $value, $pathE, $pathR);
 	    }
@@ -78,7 +78,7 @@
 	 * @param string $tableName
 	 * @param array $tableFields
 	 */
-	private function CreateClass($tableName, $tableFields, $pathE, $pathR){
+	private function createClass($tableName, $tableFields, $pathE, $pathR){
 	    // On crÃ©Ã©e les fichiers entity et repository
 	    if($this->_two_files === 2)
 		$entityFile = fopen($pathE . $tableName . ".php", "a+");
@@ -86,22 +86,22 @@
 	    $repositoryFile = fopen($pathR . $tableName . "Repository.php", "a+");
 
 	    // On commence le code source
-	    $sourceEntity = $sourceRepository = "<?php " . FileManager::getBackSpace() . $this->GetHeaderComment();
+	    $sourceEntity = $sourceRepository = "<?php " . FileManager::getBackSpace() . $this->getHeaderComment();
 	    $sourceEntity .= FileManager::getTab() . "class " . ucwords($tableName) . " {" . FileManager::getBackSpace();
 	    $sourceRepository .= FileManager::getTab() . "class " . ucwords($tableName) . "Repository {" . FileManager::getBackSpace();
 
 	    // Et on remplit la classe
 	    if($this->_two_files === 2)
-		$sourceEntity .= $this->FillEntityAttributs($tableName, $tableFields);
+		$sourceEntity .= $this->fillEntityAttributs($tableName, $tableFields);
 	    else
-		$sourceRepository .= $this->FillEntityAttributs($tableName, $tableFields);
-	    $sourceRepository .= $this->FillRepositoryAttributs($tableName, $tableFields);
+		$sourceRepository .= $this->fillEntityAttributs($tableName, $tableFields);
+	    $sourceRepository .= $this->fillRepositoryAttributs($tableName, $tableFields);
 
 	    if($this->_two_files === 2)
-		$sourceEntity .= $this->FillEntityMethods($tableName, $tableFields);
+		$sourceEntity .= $this->fillEntityMethods($tableName, $tableFields);
 	    else
-		$sourceRepository .= $this->FillEntityMethods($tableName, $tableFields);
-	    $sourceRepository .= $this->FillRepositoryMethods($tableName, $tableFields);
+		$sourceRepository .= $this->fillEntityMethods($tableName, $tableFields);
+	    $sourceRepository .= $this->fillRepositoryMethods($tableName, $tableFields);
 
 	    // On finit le code source
 	    $sourceEntity .= FileManager::getTab() . "}" . FileManager::getBackSpace() . "?>";
@@ -125,7 +125,7 @@
 	 * @param array $tableFields
 	 * @return string source code to write
 	 */
-	private function FillEntityAttributs($tableName, $tableFields){
+	private function fillEntityAttributs($tableName, $tableFields){
 	    $source = "";
 
 	    foreach($tableFields as $thisField){
@@ -142,7 +142,7 @@
 	 * @param array $tableFields
 	 * @return string source code to write
 	 */
-	private function FillRepositoryAttributs($tableName, $tableFields){
+	private function fillRepositoryAttributs($tableName, $tableFields){
 	    $source = FileManager::getTab(2) . 'private $_pdo;' . FileManager::getBackSpace();
 	    $source .= FileManager::getTab(2) . 'private $_lang;' . FileManager::getBackSpace(2);
 
@@ -155,7 +155,7 @@
 	 * @param array $tableFields
 	 * @return string source code to write
 	 */
-	private function FillEntityMethods($tableName, $tableFields){
+	private function fillEntityMethods($tableName, $tableFields){
 	    $source = "";
 
 	    // Constructeur
@@ -212,7 +212,7 @@
 	 * @param array $tableFields
 	 * @return string source code to write
 	 */
-	private function FillRepositoryMethods($tableName, $tableFields){
+	private function fillRepositoryMethods($tableName, $tableFields){
 	    $source = "";
 
 	    // Constructeur
@@ -321,7 +321,7 @@
 	    return $source;
 	}
 	
-	private function GetHeaderComment(){
+	private function getHeaderComment(){
 	    $source= "";
 	    
 	    $source .= FileManager::getTab() . FileManager::getComment(58, true) . FileManager::getBackSpace();
