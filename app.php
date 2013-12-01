@@ -21,7 +21,7 @@
      *******/
     
     $Connexion = new fitzlucassen\DALGenerator\Sql($Config->getDB(), $Config->getHOST(), $Config->getUSER(), $Config->getPWD());
-    $Utilities = new fitzlucassen\DALGenerator\Utilities($Connexion, 2);
+    $Utilities = new fitzlucassen\DALGenerator\Utilities($Connexion, 2, array("_pdoHelper"));
     $master_array = $Utilities->getTablesArray();
 
     $Utilities->createClasses($Config->getPATHENTITIES(), $Config->getPATHREPOSITORIES());

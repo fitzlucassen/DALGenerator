@@ -5,15 +5,17 @@
 	private $_connection;
 	private $_master_array;
 	private $_two_files;
+	private $_other_attributs;
 	
 	/**
 	 * Constructor
 	 * @param PDOConnection $connexion
 	 * @param int $two_files 1 if you want only one class to do both roles, 2 if you want two separate files (entity and repository)
 	 */
-	public function __construct($connexion, $two_files) {
+	public function __construct($connexion, $two_files, $otherAttributs = array()) {
 	    $this->_connection = $connexion;
 	    $this->_two_files = $two_files;
+	    $this->_other_attributs = $otherAttributs;
 	}
 	
 	
@@ -40,7 +42,7 @@
 	 * @return array $master_array
 	 */
 	public function getTablesArray($ignore_tables = array()){
-	    // On récupère toutes les tables de la base voulue
+	    // On rï¿½cupï¿½re toutes les tables de la base voulue
 	    $all_tables = $this->_connection->SelectTable("SHOW TABLES FROM " . $this->_connection->GetDB());
 	    $master_array = array();
 
@@ -51,7 +53,7 @@
 		
 		$master_array[$thisTable['Tables_in_passangerv2']] = array();
 
-		// On récupère tous les champs
+		// On rï¿½cupï¿½re tous les champs
 		$fields = $this->_connection->SelectTable("SHOW FIELDS FROM " . $this->_connection->GetDB() . "." . $thisTable['Tables_in_passangerv2']);
 
 		// Et pour chacun d'entre eux on les ajoute Ã  la table cible
@@ -81,9 +83,9 @@
 	private function createClass($tableName, $tableFields, $pathE, $pathR){
 	    // On crÃ©Ã©e les fichiers entity et repository
 	    if($this->_two_files === 2)
-		$entityFile = fopen($pathE . $tableName . ".php", "a+");
+		$entityFile = fopen($pathE . ucwords($tableName) . ".php", "a+");
 	    
-	    $repositoryFile = fopen($pathR . $tableName . "Repository.php", "a+");
+	    $repositoryFile = fopen($pathR . ucwords($tableName) . "Repository.php", "a+");
 
 	    // On commence le code source
 	    $sourceEntity = $sourceRepository = "<?php " . FileManager::getBackSpace() . $this->getHeaderComment();
@@ -144,8 +146,13 @@
 	 */
 	private function fillRepositoryAttributs($tableName, $tableFields){
 	    $source = FileManager::getTab(2) . 'private $_pdo;' . FileManager::getBackSpace();
-	    $source .= FileManager::getTab(2) . 'private $_lang;' . FileManager::getBackSpace(2);
-
+	    $source .= FileManager::getTab(2) . 'private $_lang;' . FileManager::getBackSpace();
+	    
+	    foreach ($this->_other_attributs as $thisOther){
+		$source .= FileManager::getTab(2) . 'private $' . $thisOther . ';' . FileManager::getBackSpace();
+	    }
+	    $source .= FileManager::getBackSpace();
+		    
 	    return $source;
 	}
 
@@ -196,7 +203,7 @@
 			FileManager::getTab(2) . ' * END *' . FileManager::getBackSpace() . 
 			FileManager::getTab(2) . FileManager::getComment(7, false) . FileManager::getBackSpace(2);
 	    
-	    // Fonction privé pour remplir un objet
+	    // Fonction privï¿½ pour remplir un objet
 	    $source .= FileManager::getTab(2) . FileManager::getPrototype("fillObject") . '($properties) {' . FileManager::getBackSpace();
 	    foreach($tableFields as $thisField){
 		$source .= FileManager::getTab(3) . '$this->_' . $thisField['label'] . ' = $properties["' . $thisField['label'] . '"];' . FileManager::getBackSpace();
@@ -218,8 +225,20 @@
 	    // Constructeur
 	    if($this->_two_files === 2){
 		$source .= FileManager::getTab(2) . FileManager::getPrototype("__construct") . '($pdo, $lang){' . FileManager::getBackSpace();
-		$source .= FileManager::getTab(3) . '$this->_pdo = $pdo;' . FileManager::getBackSpace();
-		$source .= FileManager::getTab(3) . '$this->_lang = $lang;' . FileManager::getBackSpace();
+		
+		if(count($this->_other_attributs) > 0){
+		    foreach ($this->_other_attributs as $thisOther){
+			if($thisOther == '_pdoHelper'){
+			    $source .= FileManager::getTab(3) . '$this->' . $thisOther . ' = $pdo;' . FileManager::getBackSpace();
+			    $source .= FileManager::getTab(3) . '$this->_pdo = $pdo->GetConnection();' . FileManager::getBackSpace();
+			}
+		    }
+		    $source .= FileManager::getTab(3) . '$this->_lang = $lang;' . FileManager::getBackSpace();
+		}
+		else {
+		    $source .= FileManager::getTab(3) . '$this->_pdo = $pdo;' . FileManager::getBackSpace();
+		    $source .= FileManager::getTab(3) . '$this->_lang = $lang;' . FileManager::getBackSpace();
+		}
 		$source .= FileManager::getTab(2) . '}' . FileManager::getBackSpace(2);
 	    }
 	    // GetAll
