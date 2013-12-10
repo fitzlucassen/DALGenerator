@@ -9,6 +9,7 @@
 	private static $_PATH_ENTITIES;
 	private static $_PATH_REPOSITORIES;
 	private static $_cpt_instance = 0;
+	private static $_link = array();
 	
 	/**
 	 * Constructor called only one time
@@ -80,7 +81,13 @@
 	    Config::$_PATH_REPOSITORIES = $path;
 	}
 	
-	
+	/**
+	 * setLink
+	 * @param type $array
+	 */
+	public function setLink($array){
+	    Config::$_link = $array;
+	}	
 	
 	/***********
 	 * GETTERS *
@@ -131,5 +138,13 @@
 	 */
 	public function getPATHREPOSITORIES(){
 	    return Config::$_PATH_REPOSITORIES;
+	}
+	
+	/**
+	 * getLink
+	 * @return type $array
+	 */
+	public function getLink(){
+	    return Config::$_link;
 	}
     }

@@ -69,9 +69,9 @@
 	/**
 	 * CreateClasses -> Create all classes
 	 */
-	public function createClasses($pathE, $pathR){
+	public function createClasses($pathE, $pathR, $link){
 	    foreach($this->_master_array as $key => $value){
-		$this->CreateClass($key, $value, $pathE, $pathR);
+		$this->CreateClass($key, $value, $pathE, $pathR, $link);
 	    }
 	}
 
@@ -80,7 +80,7 @@
 	 * @param string $tableName
 	 * @param array $tableFields
 	 */
-	private function createClass($tableName, $tableFields, $pathE, $pathR){
+	private function createClass($tableName, $tableFields, $pathE, $pathR, $link){
 	    // On créée les fichiers entity et repository
 	    if($this->_two_files === 2)
 		$entityFile = fopen($pathE . ucwords($tableName) . ".php", "a+");
@@ -94,15 +94,15 @@
 
 	    // Et on remplit la classe
 	    if($this->_two_files === 2)
-		$sourceEntity .= $this->fillEntityAttributs($tableName, $tableFields);
+		$sourceEntity .= $this->fillEntityAttributs($tableName, $tableFields, $link);
 	    else
-		$sourceRepository .= $this->fillEntityAttributs($tableName, $tableFields);
+		$sourceRepository .= $this->fillEntityAttributs($tableName, $tableFields, $link);
 	    $sourceRepository .= $this->fillRepositoryAttributs($tableName, $tableFields);
 
 	    if($this->_two_files === 2)
-		$sourceEntity .= $this->fillEntityMethods($tableName, $tableFields);
+		$sourceEntity .= $this->fillEntityMethods($tableName, $tableFields, $link);
 	    else
-		$sourceRepository .= $this->fillEntityMethods($tableName, $tableFields);
+		$sourceRepository .= $this->fillEntityMethods($tableName, $tableFields, $link);
 	    $sourceRepository .= $this->fillRepositoryMethods($tableName, $tableFields);
 
 	    // On finit le code source
@@ -127,14 +127,26 @@
 	 * @param array $tableFields
 	 * @return string source code to write
 	 */
-	private function fillEntityAttributs($tableName, $tableFields){
+	private function fillEntityAttributs($tableName, $tableFields, $link){
 	    $source = "";
-
-	    foreach($tableFields as $thisField){
+	    $replaceIdByObject = array_key_exists($tableName, $link);
+	    
+	    foreach($tableFields as $thisField){		
+		if($replaceIdByObject && in_array(strtolower(str_replace("id", "", $thisField['label'])), array_keys($link[$tableName])) && strpos($thisField['label'], "id") !== false){	
+		    $source .= FileManager::getTab(2) . 'private $_' . strtolower(str_replace("id", "", $thisField['label'])) . ';' . FileManager::getBackSpace();
+		}
 		$source .= FileManager::getTab(2) . 'private $_' . $thisField['label'] . ';' . FileManager::getBackSpace();
 	    }
+	    
+	    if($replaceIdByObject){
+		foreach($link[$tableName] as $key => $value){
+		    if($value == "OneToMany"){
+			$source .= FileManager::getTab(2) . 'private $_' . $key . 's;' . FileManager::getBackSpace();
+		    }
+		}
+	    }
 	    $source .= FileManager::getBackSpace();
-
+		
 	    return $source;
 	}
 
@@ -162,12 +174,14 @@
 	 * @param array $tableFields
 	 * @return string source code to write
 	 */
-	private function fillEntityMethods($tableName, $tableFields){
+	private function fillEntityMethods($tableName, $tableFields, $link){
 	    $source = "";
-
+	    $replaceIdByObject = array_key_exists($tableName, $link);
+	    
 	    // Constructeur
 	    $source .= FileManager::getTab(2) . "public function __construct(";
 	    $cpt = 0;
+	    // Paramètres du constructeur
 	    foreach($tableFields as $thisField){
 		$source .= '$' . $thisField['label'];
 		if($cpt < count($tableFields)-1)
@@ -179,8 +193,9 @@
 	    }
 	    $source .= "){" . FileManager::getBackSpace();
 	    $source .= FileManager::getTab(3) . '$this->fillObject(array(';
-
+	    
 	    $cpt = 0;
+	    // Le remplissage de l'entity du constructeur
 	    foreach($tableFields as $thisField){
 		$source .= '"' . $thisField['label'] . '" => $' . $thisField['label'];
 		if($cpt < count($tableFields)-1)
@@ -189,21 +204,56 @@
 	    }
 	    $source .= "));" . FileManager::getBackSpace() . FileManager::getTab(2) . "}" . FileManager::getBackSpace(2);
 
-	    // Getters publiques
+	    
+	    
+	    // Commentaire start getter
 	    $source .=	FileManager::getTab(2) . FileManager::getComment(11, true) . FileManager::getBackSpace() . 
 			FileManager::getTab(2) . ' * GETTERS *' . FileManager::getBackSpace() . 
 			FileManager::getTab(2) . FileManager::getComment(11, false) . FileManager::getBackSpace();
 	    
+	    // Getters publiques
 	    foreach($tableFields as $thisField){
+		if($replaceIdByObject && in_array(strtolower(str_replace("id", "", $thisField['label'])), array_keys($link[$tableName])) && strpos($thisField['label'], "id") !== false){
+		    $attribut = strtolower(str_replace("id", "", $thisField['label']));
+		    $linking = $link[$tableName][$attribut];
+		    		    
+		    if($linking == "OneToOne"){
+			$source .= FileManager::getTab(2) . FileManager::getPrototype("get" . ucwords(str_replace("id", "", $thisField['label']))) . "() {" . FileManager::getBackSpace();
+			$source .= FileManager::getTab(3) . '$query = "SELECT * FROM ' . $attribut . ' WHERE id' . ucwords($attribut) . '=" . $this->_id' . ucwords($attribut) . ';' . FileManager::getBackSpace();
+			$source .= FileManager::getTab(3) . 'try {' . FileManager::getBackSpace();
+			$source .= FileManager::getTab(4) . 'return $this->_pdo->Select($query);' . FileManager::getBackSpace();
+			$source .= FileManager::getTab(3) . '}' . FileManager::getBackSpace() . FileManager::getTab(3) .  "catch(PDOException " . '$e){' . FileManager::getBackSpace();
+			$source .= FileManager::getTab(4) . 'print $e->getMessage();' . FileManager::getBackSpace() . FileManager::getTab(3) ."}" . FileManager::getBackSpace();
+			$source .= FileManager::getTab(3) . 'return array();' . FileManager::getBackSpace();
+			$source .= FileManager::getTab(2) . '}' . FileManager::getBackSpace(2);
+		    }
+		}
 		$source .=  FileManager::getTab(2) . FileManager::getPrototype("get" . ucwords($thisField['label'])) . "() {" . FileManager::getBackSpace() .
 			    FileManager::getTab(3) . 'return $this->_' . $thisField['label'] . ';' . FileManager::getBackSpace() .
 			    FileManager::getTab(2) . '}' . FileManager::getBackSpace();
 	    }
+	    // Get OneToMany Objects
+	    if($replaceIdByObject){
+		foreach($link[$tableName] as $key => $value){
+		    if($value == "OneToMany"){
+			$source .= FileManager::getTab(2) . FileManager::getPrototype("get" . ucwords($key)) . "s() {" . FileManager::getBackSpace();
+			$source .= FileManager::getTab(3) . '$query = "SELECT * FROM ' . $key . ' WHERE id' . ucwords($tableName) . '=" . $this->_id;' . FileManager::getBackSpace();
+			$source .= FileManager::getTab(3) . 'try {' . FileManager::getBackSpace();
+			$source .= FileManager::getTab(4) . 'return $this->_pdo->SelectTable($query);' . FileManager::getBackSpace();
+			$source .= FileManager::getTab(3) . '}' . FileManager::getBackSpace() . FileManager::getTab(3) .  "catch(PDOException " . '$e){' . FileManager::getBackSpace();
+			$source .= FileManager::getTab(4) . 'print $e->getMessage();' . FileManager::getBackSpace() . FileManager::getTab(3) ."}" . FileManager::getBackSpace();
+			$source .= FileManager::getTab(3) . 'return array();' . FileManager::getBackSpace();
+			$source .= FileManager::getTab(2) . '}' . FileManager::getBackSpace(2);
+		    }
+		}
+	    }
+	    // Commentaire end getter
 	    $source .=	FileManager::getTab(2) . FileManager::getComment(7, true) . FileManager::getBackSpace() . 
 			FileManager::getTab(2) . ' * END *' . FileManager::getBackSpace() . 
 			FileManager::getTab(2) . FileManager::getComment(7, false) . FileManager::getBackSpace(2);
 	    
-	    // Fonction priv� pour remplir un objet
+	    
+	    // Fonction privé pour remplir un objet
 	    $source .= FileManager::getTab(2) . FileManager::getPrototype("fillObject") . '($properties) {' . FileManager::getBackSpace();
 	    foreach($tableFields as $thisField){
 		$source .= FileManager::getTab(3) . '$this->_' . $thisField['label'] . ' = $properties["' . $thisField['label'] . '"];' . FileManager::getBackSpace();
