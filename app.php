@@ -7,7 +7,7 @@
     $Config = fitzlucassen\DALGenerator\Config::getInstance();
     $fm = fitzlucassen\DALGenerator\FileManager::getInstance();
     
-    if(defined('STDIN')){
+    if(PHP_SAPI == "cli"){
 	$Config->setDB($argv[1]);		// database
 	$Config->setHOST($argv[2]);		// database host
 	$Config->setUSER($argv[3]);		// user name
