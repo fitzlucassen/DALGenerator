@@ -29,14 +29,17 @@
        // If there is some links into your tables, you have to precise these right here.
        // 
        // Example: you will have "getSongs" method into the "album" class, and you'll have "getALbum" instead of "getAlbumId" into "song" class
-       $Config->setLink(array('album' => array('song' => 'OneToMany'), 'song' => array('album' => 'OneToOne')));
+       $Config->setLink(array(	'album' => array('song' => 'OneToMany'), 
+				'song' => array('album' => 'OneToOne'),
+				'routeurl' => array('rewrittingurl' => 'OneToMany'),
+				'rewrittingurl' => array('routeurl' => 'OneToOne')));
        /*******
 	* END *
 	*******/
     }
     $Connexion = new fitzlucassen\DALGenerator\Sql($Config->getDB(), $Config->getHOST(), $Config->getUSER(), $Config->getPWD());
     $Utilities = new fitzlucassen\DALGenerator\Utilities($Connexion, 2, array("_pdoHelper"));
-    $master_array = $Utilities->getTablesArray();
+    $master_array = $Utilities->getTablesArray(array('header','lang'));
 
     $Utilities->createClasses($Config->getPATHENTITIES(), $Config->getPATHREPOSITORIES(), $Config->getLink());
     

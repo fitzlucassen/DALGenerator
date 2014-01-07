@@ -130,8 +130,7 @@
 	private function fillEntityAttributs($tableName, $tableFields, $link){
 	    $source = "";
 	    $replaceIdByObject = array_key_exists($tableName, $link);
-	    
-	    foreach($tableFields as $thisField){		
+    	    foreach($tableFields as $thisField){
 		if($replaceIdByObject && in_array(strtolower(str_replace("id", "", $thisField['label'])), array_keys($link[$tableName])) && strpos($thisField['label'], "id") !== false){	
 		    $source .= FileManager::getTab(2) . 'private $_' . strtolower(str_replace("id", "", $thisField['label'])) . ';' . FileManager::getBackSpace();
 		}
@@ -216,7 +215,7 @@
 		if($replaceIdByObject && in_array(strtolower(str_replace("id", "", $thisField['label'])), array_keys($link[$tableName])) && strpos($thisField['label'], "id") !== false){
 		    $attribut = strtolower(str_replace("id", "", $thisField['label']));
 		    $linking = $link[$tableName][$attribut];
-		    		    
+		    
 		    if($linking == "OneToOne"){
 			$source .= FileManager::getTab(2) . FileManager::getPrototype("get" . ucwords(str_replace("id", "", $thisField['label']))) . "() {" . FileManager::getBackSpace();
 			$source .= FileManager::getTab(3) . '$query = "SELECT * FROM ' . $attribut . ' WHERE id' . ucwords($attribut) . '=" . $this->_id' . ucwords($attribut) . ';' . FileManager::getBackSpace();
