@@ -181,15 +181,16 @@
 	    // Constructeur
 	    $source .= FileManager::getTab(2) . "public function __construct(";
 	    $cpt = 0;
+	    
+	    if($this->_two_files !== 2){
+		$source .= '$pdo, $lang, ';
+	    }
 	    // Paramètres du constructeur
 	    foreach($tableFields as $thisField){
-		$source .= '$' . $thisField['label'];
+		$source .= '$' . $thisField['label'] . ' = ""';
 		if($cpt < count($tableFields)-1)
 		    $source .= ', ';
 		$cpt++;
-	    }
-	    if($this->_two_files !== 2){
-		$source .= ', $pdo, $lang';
 	    }
 	    $source .= "){" . FileManager::getBackSpace();
 	    $source .= FileManager::getTab(3) . '$this->fillObject(array(';
@@ -256,7 +257,8 @@
 	    // Fonction privé pour remplir un objet
 	    $source .= FileManager::getTab(2) . FileManager::getPrototype("fillObject") . '($properties) {' . FileManager::getBackSpace();
 	    foreach($tableFields as $thisField){
-		$source .= FileManager::getTab(3) . '$this->_' . $thisField['label'] . ' = $properties["' . $thisField['label'] . '"];' . FileManager::getBackSpace();
+		$source .= FileManager::getTab(3) . 'if(!empty($properties["' . $thisField['label'] . '"]))' . FileManager::getBackSpace();
+		$source .= FileManager::getTab(4) . '$this->_' . $thisField['label'] . ' = $properties["' . $thisField['label'] . '"];' . FileManager::getBackSpace();
 	    }
 	    $source .= FileManager::getTab(2) . "}" . FileManager::getBackSpace();
 
