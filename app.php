@@ -23,20 +23,23 @@
        $Config->setHOST("localhost");					    // database host
        $Config->setUSER("root");					    // user name
        $Config->setPWD("");						    // password
-       $Config->setPATHENTITIES("C:/wamp/www/passangerv2/Data/Entity/");	    // The path where entities will be created
-       $Config->setPATHREPOSITORIES("C:/wamp/www/passangerv2/Data/Repository/");// The path where repositories will be created
+       $Config->setPATHENTITIES("C:/wamp/www/DALGenerator/Entity/");	    // The path where entities will be created
+       $Config->setPATHREPOSITORIES("C:/wamp/www/DALGenerator/Repository/");// The path where repositories will be created
        
        // If there is some links into your tables, you have to precise these right here.
        // 
        // Example: you will have "getSongs" method into the "album" class, and you'll have "getALbum" instead of "getAlbumId" into "song" class
-       $Config->setLink(array('album' => array('song' => 'OneToMany'), 'song' => array('album' => 'OneToOne')));
+       $Config->setLink(array(	'album' => array('song' => 'OneToMany'), 
+				'song' => array('album' => 'OneToOne'),
+				'routeurl' => array('rewrittingurl' => 'OneToMany'),
+				'rewrittingurl' => array('routeurl' => 'OneToOne')));
        /*******
 	* END *
 	*******/
     }
     $Connexion = new fitzlucassen\DALGenerator\Sql($Config->getDB(), $Config->getHOST(), $Config->getUSER(), $Config->getPWD());
     $Utilities = new fitzlucassen\DALGenerator\Utilities($Connexion, 2, array("_pdoHelper"));
-    $master_array = $Utilities->getTablesArray(array("header", "lang", "rewrittingurl", "routeurl"));
+    $master_array = $Utilities->getTablesArray(array('header','lang'));
 
     $Utilities->createClasses($Config->getPATHENTITIES(), $Config->getPATHREPOSITORIES(), $Config->getLink());
     
