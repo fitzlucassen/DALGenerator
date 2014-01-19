@@ -9,8 +9,10 @@ Create all the DATA-ACCESS-LAYER classes to manage the databases entities
 
 3) Just go to "localhost/DALGenerator/app.php" and enjoy your classes :)
 
-POSSIBILITIES
+Possibilities
 ============
 - Ignore some tables you don't want to implement
 - Create one file or two file for each entity table (combine or separate entity and repository role)
 - Add more default attributs in repository files
+- Create rich links between tables
+- Do all of that with command lines

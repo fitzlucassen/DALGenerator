@@ -38,7 +38,10 @@
 	*******/
     }
     $Connexion = new fitzlucassen\DALGenerator\Sql($Config->getDB(), $Config->getHOST(), $Config->getUSER(), $Config->getPWD());
+    
+    // The last argument is the array of all attributs you want to add into your classes
     $Utilities = new fitzlucassen\DALGenerator\Utilities($Connexion, 2, array("_pdoHelper"));
+    // The argument is an array of which table you want to ignore
     $master_array = $Utilities->getTablesArray(array('header','lang'));
 
     $Utilities->createClasses($Config->getPATHENTITIES(), $Config->getPATHREPOSITORIES(), $Config->getLink());
