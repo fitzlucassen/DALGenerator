@@ -6,16 +6,18 @@
 	private $_master_array;
 	private $_two_files;
 	private $_other_attributs;
+	private $_host;
 	
 	/**
 	 * Constructor
 	 * @param PDOConnection $connexion
 	 * @param int $two_files 1 if you want only one class to do both roles, 2 if you want two separate files (entity and repository)
 	 */
-	public function __construct($connexion, $two_files, $otherAttributs = array()) {
+	public function __construct($connexion, $two_files, $otherAttributs = array(), $host = '') {
 	    $this->_connection = $connexion;
 	    $this->_two_files = $two_files;
 	    $this->_other_attributs = $otherAttributs;
+	    $this->_host = $host;
 	}
 	
 	
@@ -48,17 +50,17 @@
 
 	    // Et pour chacune d'entre elles
 	    foreach($all_tables as $thisTable){
-		if(in_array($thisTable['Tables_in_passangerv2'], $ignore_tables))
+		if(in_array($thisTable['Tables_in_' + $this->_host], $ignore_tables))
 		    continue;
 		
-		$master_array[$thisTable['Tables_in_passangerv2']] = array();
+		$master_array[$thisTable['Tables_in_' + $this->_host]] = array();
 
 		// On r�cup�re tous les champs
-		$fields = $this->_connection->SelectTable("SHOW FIELDS FROM " . $this->_connection->GetDB() . "." . $thisTable['Tables_in_passangerv2']);
+		$fields = $this->_connection->SelectTable("SHOW FIELDS FROM " . $this->_connection->GetDB() . "." . $thisTable['Tables_in_' + $this->_host]);
 
 		// Et pour chacun d'entre eux on les ajoute à la table cible
 		foreach($fields as $thisField){
-		    $master_array[$thisTable['Tables_in_passangerv2']][] = array('label' => $thisField['Field'], 'type' => $thisField['Type']);
+		    $master_array[$thisTable['Tables_in_' + $this->_host]][] = array('label' => $thisField['Field'], 'type' => $thisField['Type']);
 		}
 	    }
 	    $this->SetMasterArray($master_array);

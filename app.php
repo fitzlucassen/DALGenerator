@@ -1,4 +1,7 @@
 <?php
+
+    use fitzlucassen\DALGenerator as DAL;
+    
     require_once 'library/Config.php';
     require_once 'library/Sql.php';
     require_once 'library/FileManager.php';
@@ -19,12 +22,12 @@
 	/*************************
 	 * PUT YOUR CONFIGS HERE *
 	 *************************/
-       $Config->setDB("passangerv2");					    // database
+       $Config->setDB("portfoliov2");					    // database
        $Config->setHOST("localhost");					    // database host
        $Config->setUSER("root");					    // user name
        $Config->setPWD("");						    // password
-       $Config->setPATHENTITIES("C:/wamp/www/DALGenerator/Entity/");	    // The path where entities will be created
-       $Config->setPATHREPOSITORIES("C:/wamp/www/DALGenerator/Repository/");// The path where repositories will be created
+       $Config->setPATHENTITIES("C:/wamp/www/");	    // The path where entities will be created
+       $Config->setPATHREPOSITORIES("C:/wamp/www/");// The path where repositories will be created
        
        // If there is some links into your tables, you have to precise these right here.
        // 
@@ -37,12 +40,12 @@
 	* END *
 	*******/
     }
-    $Connexion = new fitzlucassen\DALGenerator\Sql($Config->getDB(), $Config->getHOST(), $Config->getUSER(), $Config->getPWD());
+    $Connexion = new DAL\Sql($Config->getDB(), $Config->getHOST(), $Config->getUSER(), $Config->getPWD());
     
     // The last argument is the array of all attributs you want to add into your classes
-    $Utilities = new fitzlucassen\DALGenerator\Utilities($Connexion, 2, array("_pdoHelper"));
+    $Utilities = new DAL\Utilities($Connexion, 2, array("_pdoHelper"), $Config->getHOST());
     // The argument is an array of which table you want to ignore
-    $master_array = $Utilities->getTablesArray(array('header','lang'));
+    $master_array = $Utilities->getTablesArray(array('header','lang', 'routeurl', 'rewrittingurl'));
 
     $Utilities->createClasses($Config->getPATHENTITIES(), $Config->getPATHREPOSITORIES(), $Config->getLink());
     
