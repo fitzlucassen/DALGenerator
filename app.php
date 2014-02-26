@@ -7,8 +7,8 @@
     require_once 'library/FileManager.php';
     require_once 'library/Utilities.php';
 
-    $Config = fitzlucassen\DALGenerator\Config::getInstance();
-    $fm = fitzlucassen\DALGenerator\FileManager::getInstance();
+    $Config = DAL\Config::getInstance();
+    $fm = DAL\FileManager::getInstance();
     
     if(PHP_SAPI == "cli"){
 	$Config->setDB($argv[1]);		// database

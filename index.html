@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>DALGenerator - Accueil</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width">
+        <style>
+            html, body{
+                width: 100%;
+                height: 100%;
+                background: #f2f2f2;
+                margin: 0;
+                padding: 0;
+            }
+            h1{
+                font-family: Verdana;
+                font-weight: normal;
+                color: #444;
+                text-align: center;
+            }
+            p{
+                font-family: verdana;
+                color: #444;
+                text-align: center;
+            }
+            p.button{
+                width: 100px;
+                padding: 10px;
+                margin: auto;
+                border: 1px solid #aaa;
+                background: #e1e1e1;
+                text-align: center;
+                
+                border-radius: 3px;
+                -webkit-border-radius: 3px;
+                -moz-border-radius: 3px;
+                -o-border-radius: 3px;
+                -ms-border-radius: 3px;
+                
+                transition: all 0.5s linear;
+                -webkit-transition: all 0.5s linear;
+                -moz-transition: all 0.5s linear;
+                -o-transition: all 0.5s linear;
+                -ms-transition: all 0.5s linear;
+            }
+            p.button a{
+                text-decoration: none;
+                color: #666;
+                font-family: Verdana;
+                font-size: 18px;
+                display: block;
+                width: 100%;
+                height: 100%;
+                
+                transition: all 0.5s linear;
+                -webkit-transition: all 0.5s linear;
+                -moz-transition: all 0.5s linear;
+                -o-transition: all 0.5s linear;
+                -ms-transition: all 0.5s linear;
+            }
+            p.button:hover{
+                background: #d1d1d1;
+            }
+            p.button:hover a{
+                color: #888;
+            }
+            p.pre{
+                font-family: "Bitstream Vera Sans Mono", "Consolas", "Monaco", monospace;
+                font-size: 90%;
+                line-height: normal;
+                background: rgba(100, 100, 100, 0.10);
+                padding: 10px;
+                color: #003D4C;
+                
+            }
+            div.doc{
+                text-align: left;
+                width: 90%;
+                margin: auto;
+            }
+            div.doc p{
+                width: 90%;
+                margin: auto;
+                text-align: left;
+                line-height: normal;
+                margin: 10px 0;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="container">
+            <h1>Vous êtes sur le point de générer la couche Data de votre application</h1>
+            <p>Assurez-vous que vous avez bien configurer le module dans le fichier app.php</p>
+            <p>Si vous êtes sur de vous, cliquez sur le bouton suivant. Sinon, la documentation est ci-dessous.</p>
+            <p>&nbsp;</p>
+            <p class="button"><a href="app.php">Générer</a></p>
+            <p>&nbsp;</p>
+            <p>&nbsp;</p>
+            
+            <div class="doc">
+                <p class="pre">$Config->setLink($array)</p>
+                <p>L'array est sous la forme :</p>
+                <p class="pre">array('table1' => array('table2' => 'typeDeLien'))</p>
+                <p>Cette fonction permet de générer des liens entres les classes qui vont être créer. 
+                    C'est en quelque sorte l'image des clefs étragères de la base de données</p>
+                <p>Il y a 2 types de lien possible. <i>"OneToMany"</i> et <i>"OneToOne"</i>. 
+                    <br/>OneToMany permet de créer un lien dans une entity entre une instance d'une classe et plusieurs instances d'une autre classe.
+                    <br/>Par exemple : <i>Un album de musique contient plusieurs chanson</i>.<br/>
+                    <br/>OneToOne permet de créer un lien dans une entity entre une instance d'une classe et une unique instance d'une autre classe.
+                    <br/>Par exemple : <i>Une chanson a un seul et unique album</i>.<br/></p>
+                
+                <p class="pre">$Utilities->getTablesArray($array)</p>
+                <p>L'array est facultatif et sous la forme :</p>
+                <p class="pre">array('table1', 'table2' ...)</p>
+                <p>Cette fonction récupère toutes les tables de la base de données cible afin de préparer la génération. 
+                    <br/>Fournir en paramètre un array avec des noms de table permet de préciser les tables que l'on ne veut pas générer.</p>
+                
+                <p class="pre">DAL\Sql($db, $host, $user, $pwd)</p>
+                <p>Ce constructeur permet de créer la connexion à votre base de données. 
+                    Il suffit donc en amont de renseigner vos informations</p>
+                <p class="pre">DAL\Utilities($sqlObject, $nbFile, $array, $host)</p>
+                <p>Ce constructeur créer l'objet qui va s'occuper de générer vos classes php.<br/>
+                    Le premier paramètre est l'objet sql créer précédemment.<br/>
+                    Le deuxième paramètre permet de préciser si l'on veut un fichier final généré ou deux<br/>
+                    Le troisième paramètre est facultatif. 
+                    C'est un array qui permet de préciser des attributs supplémentaires que l'on veut voir apparaître dans les classes générées.<br/>
+                    Le dernier paramètre est l'host de la BDD. Il est facultatif.</p>
+                
+                <p class="pre">$Utilities->createClasses($entityPath, $repositoryPath, $links)</p>
+                <p>
+                    Cette fonction lance la génération des classes.<br/>
+                    Le premier paramètre est le chemin physique dans lequel nous voulons générer les fichiers "entity".<br/>
+                    Le deuxième paramètre est le chemin physique dans lequel nous voulons générer les fichiers "repository".<br/>
+                    (Sachant que ces deux paramètres sont à configurer en amont)<br/>
+                    Le troisième paramètre est l'array de lien configurer plutôt avec la fonction <i>setLink</i>.
+                </p>
+            </div>
+        </div>
+    </body>
+</html>
