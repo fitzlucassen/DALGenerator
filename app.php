@@ -7,7 +7,7 @@
     require_once 'library/FileManager.php';
     require_once 'library/Utilities.php';
 
-    $Config = DAL\Config::getInstance();
+    $Config = new DAL\Config();
     $fm = DAL\FileManager::getInstance();
     
     if(PHP_SAPI == "cli"){
@@ -22,7 +22,7 @@
 	/*************************
 	 * PUT YOUR CONFIGS HERE *
 	 *************************/
-       $Config->setDB("portfoliov2");					    // database
+       $Config->setDB("db_emoson");					    // database
        $Config->setHOST("localhost");					    // database host
        $Config->setUSER("root");					    // user name
        $Config->setPWD("");						    // password
@@ -52,3 +52,5 @@
     if(defined('STDIN')){
 	exit(0);
     }
+    
+    echo "<h1>Les classes ont été générées avec succès !</h1>";

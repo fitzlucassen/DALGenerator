@@ -8,26 +8,12 @@
 	private static $_PWD;
 	private static $_PATH_ENTITIES;
 	private static $_PATH_REPOSITORIES;
-	private static $_cpt_instance = 0;
 	private static $_link = array();
 	
 	/**
 	 * Constructor called only one time
 	 */
-	private function __construct() {
-	}
-	
-	/**
-	 * GetInstance -> return an instance of Config class only if there isn't any one else
-	 * @return \Config|boolean
-	 */
-	public function getInstance(){
-	    if(Config::$_cpt_instance === 0){
-		Config::$_cpt_instance++;
-		return new Config();
-	    }
-	    else
-		return false;
+	public function __construct() {
 	}
 	
 	/***********

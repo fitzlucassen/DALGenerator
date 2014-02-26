@@ -14,7 +14,7 @@
 	 * GetInstance -> return an instance of Config class only if there isn't any one else
 	 * @return \Config|boolean
 	 */
-	public function getInstance(){
+	public static function getInstance(){
 	    if(FileManager::$_cpt_instance === 0){
 		FileManager::$_cpt_instance++;
 		return new FileManager();
