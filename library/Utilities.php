@@ -1,5 +1,5 @@
 <?php
-    namespace fitzlucassen\DALGenerator;
+    namespace fitzlucassen\DALGenerator\library;
 	
     class Utilities {
 	private $_connection;

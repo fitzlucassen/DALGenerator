@@ -1,5 +1,5 @@
 <?php
-    namespace fitzlucassen\DALGenerator;
+    namespace fitzlucassen\DALGenerator\library;
 	
     class FileManager {
 	private static $_cpt_instance = 0;

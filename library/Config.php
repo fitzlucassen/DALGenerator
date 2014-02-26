@@ -1,5 +1,5 @@
 <?php
-    namespace fitzlucassen\DALGenerator;
+    namespace fitzlucassen\DALGenerator\library;
 
     class Config {
 	private static $_DB;

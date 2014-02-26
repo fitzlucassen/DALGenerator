@@ -1,6 +1,7 @@
 <?php
-    namespace fitzlucassen\DALGenerator;
-    USE PDO;
+    namespace fitzlucassen\DALGenerator\library;
+    
+    use PDO;
 
     /*
       Class : SQL
@@ -32,7 +33,7 @@
 
 		$this->_con = new \PDO($this->GetDns(), $this->_user, $this->_pwd, array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'));
 
-		// pour mysql on active le cache de requête 
+		// pour mysql on active le cache de requï¿½te 
 		if($this->_con->getAttribute(PDO::ATTR_DRIVER_NAME) == 'mysql') 
 		    $this->_con->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true); 
 
@@ -71,7 +72,7 @@
 	    } 
 	    catch (Exception $e)  
 	    { 
-		//On indique par email que la requète n'a pas fonctionnÃ©. 
+		//On indique par email que la requï¿½te n'a pas fonctionnÃ©. 
 		error_log(date('D/m/y').' Ã  '.date("H:i:s").' : '.$e->getMessage(), 1, $this->_email); 
 		$this->_con->rollBack(); 
 		$message = new Message(); 
@@ -90,7 +91,7 @@
 	    $result->execute();
 	    $this->_con->commit();
 	    
-	    /* Récupération de toutes les lignes d'un jeu de résultats "équivalent Ã  mysql_num_row() " */ 
+	    /* Rï¿½cupï¿½ration de toutes les lignes d'un jeu de rï¿½sultats "ï¿½quivalent Ã  mysql_num_row() " */ 
 	    $resultat = $result->fetchAll(); 
 	    return $resultat; 
 	}

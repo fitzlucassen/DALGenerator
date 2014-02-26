@@ -1,6 +1,6 @@
 <?php
 
-    use fitzlucassen\DALGenerator as DAL;
+    use fitzlucassen\DALGenerator\library as DAL;
     
     require_once 'library/Config.php';
     require_once 'library/Sql.php';
@@ -53,4 +53,4 @@
 	exit(0);
     }
     
-    echo "<h1>Les classes ont été générées avec succès !</h1>";
+    echo "<h1>Les classes ont &eacute;t&eacute; g&eacute;n&eacute;r&eacute;es avec succ&eagrave;s !</h1>";
