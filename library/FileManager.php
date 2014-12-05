@@ -96,4 +96,32 @@
 				$source .= "/";
 		    return $source;
 		}
+
+		public static function createDirectoryIfNotExist($path){
+			if(!is_dir($path))
+		    	mkdir($path);
+		}
+
+		public static function createFile($file, $type, $erase){
+			if($erase)
+				return fopen($file, $type);
+			else {
+				if(!file_exists($file))
+					return fopen($file, $type);
+				else
+					return false;
+			}
+		}
+
+		public static function closeFiles($array){
+			foreach ($array as $value)
+				if(isset($value) && gettype($value) !== 'boolean')
+					fclose($value);
+		}
+
+		public static function writeInFiles($array){
+			foreach ($array as $content => $file) 
+				if(isset($file) && gettype($file) !== 'boolean')
+					fwrite($file, $content);
+		}
     }

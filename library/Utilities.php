@@ -4,18 +4,15 @@
     class Utilities {
 		private $_connection;
 		private $_master_array;
-		private $_two_files;
 		private $_other_attributs;
 		private $_host;
 		
 		/**
 		 * Constructor
 		 * @param PDOConnection $connexion
-		 * @param int $two_files 1 if you want only one class to do both roles, 2 if you want two separate files (entity and repository)
 		 */
-		public function __construct($connexion, $two_files, $otherAttributs = array(), $host = '') {
+		public function __construct($connexion, $otherAttributs = array(), $host = '') {
 		    $this->_connection = $connexion;
-		    $this->_two_files = $two_files;
 		    $this->_other_attributs = $otherAttributs;
 		    $this->_host = $host;
 		}
@@ -67,9 +64,9 @@
 		/**
 		 * CreateClasses -> Create all classes
 		 */
-		public function createClasses($pathE, $pathR, $link){
+		public function createClasses($path, $link){
 		    foreach($this->_master_array as $key => $value){
-				$this->CreateClass($key, $value, $pathE, $pathR, $link);
+				$this->CreateClass($key, $value, $path, $link);
 		    }
 		}
 
@@ -78,53 +75,136 @@
 		 * @param string $tableName
 		 * @param array $tableFields
 		 */
-		private function createClass($tableName, $tableFields, $pathE, $pathR, $link){
-		    // On créée les fichiers entity et repository
-		    if($this->_two_files === 2)
-				$entityFile = fopen($pathE . ucwords(strtolower($tableName)) . ".php", "a+");
-		    
-		    $repositoryFile = fopen($pathR . ucwords(strtolower($tableName)) . "Repository.php", "a+");
-
+		private function createClass($tableName, $tableFields, $path, $link){
 		    // On commence le code source
-		    $sourceEntity = $sourceRepository = "<?php " . FileManager::getBackSpace() . $this->getHeaderComment();
-		    
-		    $sourceRepository .= FileManager::getTab() . 'namespace fitzlucassen\FLFramework\Data\Repository;' . FileManager::getBackSpace(2);
-		    $sourceRepository .= FileManager::getTab() . 'use fitzlucassen\FLFramework\Library\Core;' . FileManager::getBackSpace();
-		    $sourceRepository .= FileManager::getTab() . 'use fitzlucassen\FLFramework\Data\Entity;' . FileManager::getBackSpace(2);
-		    
-		    $sourceEntity .= FileManager::getTab() . 'namespace fitzlucassen\FLFramework\Data\Entity;' . FileManager::getBackSpace(2);
-		    $sourceEntity .= FileManager::getTab() . 'use fitzlucassen\FLFramework\Library\Core;' . FileManager::getBackSpace(2);
-		    
-		    $sourceEntity .= FileManager::getTab() . "class " . ucwords(strtolower($tableName)) . " {" . FileManager::getBackSpace();
-		    $sourceRepository .= FileManager::getTab() . "class " . ucwords(strtolower($tableName)) . "Repository {" . FileManager::getBackSpace();
+		    $sourceRepository = $this->getRepositoryHeader($tableName);
+		    $sourceEntity = $this->getEntityHeader($tableName);
 
 		    // Et on remplit la classe
-		    if($this->_two_files === 2)
-				$sourceEntity .= $this->fillEntityAttributs($tableName, $tableFields, $link);
-		    else
-				$sourceRepository .= $this->fillEntityAttributs($tableName, $tableFields, $link);
+			$sourceEntity .= $this->fillEntityAttributs($tableName, $tableFields, $link);
 		    $sourceRepository .= $this->fillRepositoryAttributs($tableName, $tableFields);
 
-		    if($this->_two_files === 2)
-				$sourceEntity .= $this->fillEntityMethods($tableName, $tableFields, $link);
-		    else
-				$sourceRepository .= $this->fillEntityMethods($tableName, $tableFields, $link);
+			$sourceEntity .= $this->fillEntityMethods($tableName, $tableFields, $link);
 		    $sourceRepository .= $this->fillRepositoryMethods($tableName, $tableFields);
 
 		    // On finit le code source
 		    $sourceEntity .= FileManager::getTab() . "}" . FileManager::getBackSpace();
 		    $sourceRepository .= FileManager::getTab() . "}" . FileManager::getBackSpace();
 
-		    // On ecrit le contenu de chaque classe dans leur fichier
-		    if($this->_two_files === 2)
-				fwrite($entityFile, $sourceEntity);
-		    
-		    fwrite($repositoryFile, $sourceRepository);
+		    FileManager::createDirectoryIfNotExist($path . '/Base');
+		    FileManager::createDirectoryIfNotExist($path . '/Base/Entity');
+		    FileManager::createDirectoryIfNotExist($path . '/Base/Repository');
+		    FileManager::createDirectoryIfNotExist($path . '/Entity');
+		    FileManager::createDirectoryIfNotExist($path . '/Repository');
 
-		    // On ferme les deux fichiers
-		    if($this->_two_files === 2)
-				fclose($entityFile);
-		    fclose($repositoryFile);
+		    // On créée les fichiers entity et repository base
+		    $entityBaseFile = FileManager::createFile($path . 'Base/Entity/' . ucwords(strtolower($tableName)) . "Base.php", "w+", true);
+		    $repositoryBaseFile = FileManager::createFile($path . 'Base/Repository/' . ucwords(strtolower($tableName)) . "RepositoryBase.php", "w+", true);
+		    // On créée les fichiers entity et repository normaux uniquement s'ils n'existent pas déjà
+		    $entityFile = FileManager::createFile($path . 'Entity/' . ucwords(strtolower($tableName)) . ".php", "w+", false);
+		    $repositoryFile = FileManager::createFile($path . 'Repository/' . ucwords(strtolower($tableName)) . "Repository.php", "w+", false);+
+
+		    $sourceRepository2 = $this->getRepositoryHeader($tableName, false, ucwords(strtolower($tableName)) . 'RepositoryBase');
+		    $sourceEntity2 = $this->getEntityHeader($tableName, false, ucwords(strtolower($tableName)) . 'Base');
+
+		    $sourceRepository2 .= $this->getRepositoryContent();
+		    $sourceEntity2 .= $this->getEntityContent($tableName, $tableFields, $link);
+
+		    $sourceRepository2 .= FileManager::getTab() . "}" . FileManager::getBackSpace();
+		    $sourceEntity2.= FileManager::getTab() . "}" . FileManager::getBackSpace();
+
+		    // On ecrit le contenu de chaque classe dans leur fichier
+		    FileManager::writeInFiles(array(
+		    	$sourceEntity => $entityBaseFile,
+		    	$sourceRepository => $repositoryBaseFile,
+		    	$sourceEntity2 => $entityFile,
+		    	$sourceRepository2 => $repositoryFile,
+		    ));
+
+		    // On ferme les quatres fichiers
+		    FileManager::closeFiles(array($entityFile, $repositoryFile, $entityBaseFile, $repositoryBaseFile));
+		}
+
+		private function getRepositoryHeader($tableName, $base = true, $extends = false){
+			$string = '';
+
+			$string .= "<?php " . FileManager::getBackSpace() . $this->getHeaderComment();
+			$string .= FileManager::getTab() . 'namespace fitzlucassen\FLFramework\Data\\' . ($base ? 'Base\\' : '') . 'Repository;' . FileManager::getBackSpace(2);
+		    $string .= FileManager::getTab() . 'use fitzlucassen\FLFramework\Library\Core;' . FileManager::getBackSpace();
+		    $string .= FileManager::getTab() . 'use fitzlucassen\FLFramework\Data\Entity;' . FileManager::getBackSpace();
+	    	$string .= FileManager::getTab() . 'use fitzlucassen\FLFramework\Data\Base\Entity as EntityBase;' . FileManager::getBackSpace();
+
+	    	if(!$base)
+	    		$string .= FileManager::getTab() . 'use fitzlucassen\FLFramework\Data\Base\Repository as RepositoryBase;' . FileManager::getBackSpace();
+
+		    $extends = ($extends !== false ? 'extends ' . (!$base ? 'RepositoryBase\\' : '') . $extends : '');
+
+	    	$string .= FileManager::getBackSpace();
+		    $string .= FileManager::getTab() . 'class ' . ucwords(strtolower($tableName)) . 'Repository' . ($base ? 'Base' : '') . ' ' . $extends . ' {' . FileManager::getBackSpace();
+
+			return $string;
+		}
+
+		private function getEntityHeader($tableName, $base = true, $extends = false){
+			$string = '';
+
+			$string .= "<?php " . FileManager::getBackSpace() . $this->getHeaderComment();
+			$string .= FileManager::getTab() . 'namespace fitzlucassen\FLFramework\Data\\' . ($base ? 'Base\\' : '') . 'Entity;' . FileManager::getBackSpace(2);
+		    $string .= FileManager::getTab() . 'use fitzlucassen\FLFramework\Library\Core;' . FileManager::getBackSpace();
+		    if(!$base)
+		    	$string .= FileManager::getTab() . 'use fitzlucassen\FLFramework\Data\Base\Entity as EntityBase;' . FileManager::getBackSpace();
+		    else
+		    	$string .= FileManager::getTab() . 'use fitzlucassen\FLFramework\Data\Entity;' . FileManager::getBackSpace();
+
+		    $extends = ($extends !== false ? 'extends ' . (!$base ? 'EntityBase\\' : '') . $extends : '');
+
+		    $string .= FileManager::getBackSpace();
+		    $string .= FileManager::getTab() . 'class ' . ucwords(strtolower($tableName)) . ($base ? 'Base' : '') . ' ' . $extends . ' {' . FileManager::getBackSpace();
+
+			return $string;
+		}
+
+		private function getRepositoryContent(){
+			$source = "";
+
+		    // Constructeur
+			$source .= FileManager::getTab(2) . FileManager::getPrototype("__construct", array('pdo' => '_none_', 'lang' => '_none_')) . ' {' . FileManager::getBackSpace();
+		    $source .= FileManager::getTab(3) . 'parent::__construct($pdo, $lang);' . FileManager::getBackSpace();
+			$source .= FileManager::getTab(2) . '}' . FileManager::getBackSpace(2);
+		    
+		    return $source;
+		}
+
+		private function getEntityContent($tableName, $tableFields, $link){
+		    $source = "";
+		    $replaceIdByObject = array_key_exists($tableName, $link);
+
+		    // Constructeur
+		    $paramsTmp = array();
+		    $cpt = 0;
+		    
+		    // Paramètres du constructeur
+		    foreach($tableFields as $thisField){
+		    	$paramsTmp[$thisField['label']] = "''";
+				$cpt++;
+		    }
+
+		    $source .= FileManager::getTab(2) . FileManager::getPrototype('__construct', $paramsTmp);
+		    $source .= "{" . FileManager::getBackSpace();
+
+		    $source .= FileManager::getTab(3) . 'parent::__construct(';
+
+		    $cpt = 0;
+		    foreach ($paramsTmp as $key => $value) {
+		    	$source .= '$' . $key;
+		    	if($cpt < count($paramsTmp) - 1)
+				    $source .= ', ';
+		    	$cpt++;
+		    }
+		    $source .= ');' . FileManager::getBackSpace();
+			$source .= FileManager::getTab(2) . '}' . FileManager::getBackSpace(2);
+		    
+		    return $source;
 		}
 
 		/**
@@ -168,11 +248,11 @@
 		 * @return string source code to write
 		 */
 		private function fillRepositoryAttributs($tableName, $tableFields){
-		    $source = FileManager::getTab(2) . 'private $_pdo;' . FileManager::getBackSpace();
-		    $source .= FileManager::getTab(2) . 'private $_lang;' . FileManager::getBackSpace();
+		    $source = FileManager::getTab(2) . 'protected $_pdo;' . FileManager::getBackSpace();
+		    $source .= FileManager::getTab(2) . 'protected $_lang;' . FileManager::getBackSpace();
 		    
 		    foreach ($this->_other_attributs as $thisOther){
-				$source .= FileManager::getTab(2) . 'private $' . $thisOther . ';' . FileManager::getBackSpace();
+				$source .= FileManager::getTab(2) . 'protected $' . $thisOther . ';' . FileManager::getBackSpace();
 		    }
 		    $source .= FileManager::getBackSpace();
 			    
@@ -193,11 +273,6 @@
 		    $paramsTmp = array();
 		    $cpt = 0;
 		    
-		    if($this->_two_files !== 2){
-		    	$paramsTmp['pdo'] = '_none_';
-		    	$paramsTmp['lang'] = '_none_';
-		    }
-
 		    // Paramètres du constructeur
 		    foreach($tableFields as $thisField){
 		    	$paramsTmp[$thisField['label']] = "''";
@@ -284,27 +359,25 @@
 		    $source = "";
 
 		    // Constructeur
-		    if($this->_two_files === 2){
-				$source .= FileManager::getTab(2) . FileManager::getPrototype("__construct", array('pdo' => '_none_', 'lang' => '_none_')) . ' {' . FileManager::getBackSpace();
-				
-				if(count($this->_other_attributs) > 0){
-				    foreach ($this->_other_attributs as $thisOther){
-						if($thisOther == '_pdoHelper'){
-						    $source .= FileManager::getTab(3) . '$this->' . $thisOther . ' = $pdo;' . FileManager::getBackSpace();
-						    $source .= FileManager::getTab(3) . '$this->_pdo = $pdo->GetConnection();' . FileManager::getBackSpace();
-						}
-						if($thisOther == '_queryBuilder'){
-						    $source .= FileManager::getTab(3) . '$this->' . $thisOther . ' = new Core\QueryBuilder(true);' . FileManager::getBackSpace();
-						}
-				    }
-				    $source .= FileManager::getTab(3) . '$this->_lang = $lang;' . FileManager::getBackSpace();
-				}
-				else {
-				    $source .= FileManager::getTab(3) . '$this->_pdo = $pdo;' . FileManager::getBackSpace();
-				    $source .= FileManager::getTab(3) . '$this->_lang = $lang;' . FileManager::getBackSpace();
-				}
-				$source .= FileManager::getTab(2) . '}' . FileManager::getBackSpace(2);
-		    }
+			$source .= FileManager::getTab(2) . FileManager::getPrototype("__construct", array('pdo' => '_none_', 'lang' => '_none_')) . ' {' . FileManager::getBackSpace();
+			
+			if(count($this->_other_attributs) > 0){
+			    foreach ($this->_other_attributs as $thisOther){
+					if($thisOther == '_pdoHelper'){
+					    $source .= FileManager::getTab(3) . '$this->' . $thisOther . ' = $pdo;' . FileManager::getBackSpace();
+					    $source .= FileManager::getTab(3) . '$this->_pdo = $pdo->GetConnection();' . FileManager::getBackSpace();
+					}
+					if($thisOther == '_queryBuilder'){
+					    $source .= FileManager::getTab(3) . '$this->' . $thisOther . ' = new Core\QueryBuilder(true);' . FileManager::getBackSpace();
+					}
+			    }
+			    $source .= FileManager::getTab(3) . '$this->_lang = $lang;' . FileManager::getBackSpace();
+			}
+			else {
+			    $source .= FileManager::getTab(3) . '$this->_pdo = $pdo;' . FileManager::getBackSpace();
+			    $source .= FileManager::getTab(3) . '$this->_lang = $lang;' . FileManager::getBackSpace();
+			}
+			$source .= FileManager::getTab(2) . '}' . FileManager::getBackSpace(2);
 		    
 		    // GetAll
 		    $source .=	FileManager::getTab(2) . FileManager::getComment(26, true) . FileManager::getBackSpace() . 

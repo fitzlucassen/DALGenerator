@@ -6,8 +6,7 @@
 	private static $_HOST;
 	private static $_USER;
 	private static $_PWD;
-	private static $_PATH_ENTITIES;
-	private static $_PATH_REPOSITORIES;
+	private static $_PATH;
 	private static $_link = array();
 	
 	/**
@@ -55,16 +54,8 @@
 	 * SetPATHENTITIES
 	 * @param type $path
 	 */
-	public function setPATHENTITIES($path){
-	    Config::$_PATH_ENTITIES = $path;
-	}
-	
-	/**
-	 * SetPATHREPOSITORIES
-	 * @param type $path
-	 */
-	public function setPATHREPOSITORIES($path){
-	    Config::$_PATH_REPOSITORIES = $path;
+	public function setPATH($path){
+	    Config::$_PATH = $path;
 	}
 	
 	/**
@@ -114,16 +105,8 @@
 	 * GetPATHENTITIES
 	 * @return type $path
 	 */
-	public function getPATHENTITIES(){
-	    return Config::$_PATH_ENTITIES;
-	}
-	
-	/**
-	 * GetPATHREPOSITORIES
-	 * @return type $path
-	 */
-	public function getPATHREPOSITORIES(){
-	    return Config::$_PATH_REPOSITORIES;
+	public function getPATH(){
+	    return Config::$_PATH;
 	}
 	
 	/**

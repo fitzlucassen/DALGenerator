@@ -25,8 +25,7 @@
 		 $Config->setHOST("localhost");					    // database host
 		 $Config->setUSER("root");					        // user name
 		 $Config->setPWD("");						        // password
-		 $Config->setPATHENTITIES("C:/wamp/www/test/");			// The path where entities will be created
-		 $Config->setPATHREPOSITORIES("C:/wamp/www/test/");		// The path where repositories will be created
+		 $Config->setPATH("C:/wamp/www/flframework/Data/");			// The path where entities and repositories will be created
 		 
 		 // If there is some links into your tables, you have to precise these right here.
 		 // 
@@ -43,11 +42,11 @@
 	$Connexion = new DAL\Sql($Config->getDB(), $Config->getHOST(), $Config->getUSER(), $Config->getPWD());
 
 	// The last argument is the array of all attributs you want to add into your classes
-	$Utilities = new DAL\Utilities($Connexion, 2, array("_pdoHelper", "_queryBuilder"), $Config->getHOST());
+	$Utilities = new DAL\Utilities($Connexion, array("_pdoHelper", "_queryBuilder"), $Config->getHOST());
 	// The argument is an array of which table you want to ignore
 	$master_array = $Utilities->getTablesArray(/*array('lang', 'header', 'routeurl', 'rewrittingurl')*/);
 
-	$Utilities->createClasses($Config->getPATHENTITIES(), $Config->getPATHREPOSITORIES(), $Config->getLink());
+	$Utilities->createClasses($Config->getPATH(), $Config->getLink());
 
 	if(defined('STDIN')){
 		exit(0);
